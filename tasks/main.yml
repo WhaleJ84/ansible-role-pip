@@ -1,0 +1,39 @@
+---
+- name: PRE-INSTALL | pip
+  tags:
+    - pre-install
+  block:
+    - name: PRE-INSTALL | Check for python executable
+      ansible.builtin.shell:
+        cmd: "command -v python"
+      register: python_executable
+      ignore_errors: True
+      changed_when: False
+
+    - name: PRE-INSTALL | Register python as target
+      ansible.builtin.set_fact:
+        python_version: "{{ python_executable.stdout | regex_replace('.*/', '') }}"
+      when: python_executable.rc == 0
+
+    - name: PRE-INSTALL | Check for python3 executable
+      ansible.builtin.shell:
+        cmd: "command -v python3"
+      register: python3_executable
+      ignore_errors: True
+      changed_when: False
+      when: python_executable.rc != 0
+
+    - name: PRE-INSTALL | Register python3 as target
+      ansible.builtin.set_fact:
+        python_version: "{{ python3_executable.stdout | regex_replace('.*/', '') }}"
+      when: python3_executable.rc == 0
+
+- name: INSTALL | pip
+  tags:
+    - -install
+  block:
+    - name: INSTALL | Ensure python-pip is installed
+      ansible.builtin.package:
+        name: "{{ python_version }}-pip"
+        state: present
+      become: True
