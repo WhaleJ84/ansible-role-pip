@@ -30,7 +30,7 @@
 
 - name: INSTALL | pip
   tags:
-    - -install
+    - install
   block:
     - name: INSTALL | Ensure python-pip is installed
       ansible.builtin.package:
